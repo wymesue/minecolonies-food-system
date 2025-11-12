@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Minecolonies Food System</title>
+<style>
+  :root{
+    --bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e5e7eb;--accent:#93c5fd;--ok:#16a34a;--warn:#f59e0b;--card:#111827;--line:#22314d;
+  }
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;line-height:1.45}
+  .container{max-width:1200px;margin:0 auto;padding:24px}
+  h1{margin:0 0 6px;color:var(--accent);font-size:28px;font-weight:700}
+  h2{margin:22px 0 10px;font-size:18px;border-bottom:1px solid var(--line);padding-bottom:8px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .small{font-size:12px;color:var(--muted)}
+  .row{display:flex;align-items:center;gap:8px;margin:6px 0}
+  label{cursor:pointer}
+  .pill{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:999px;background:var(--card);margin:2px 6px 2px 0;font-size:12px}
+  .section{margin-top:18px}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  input[type="search"]{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0d1528;color:#e5e7eb}
+  select{padding:8px;border-radius:8px;border:1px solid var(--line);background:#0d1528;color:#e5e7eb;cursor:pointer}
+  .recipe{background:var(--panel);border:1px solid;border-radius:12px;padding:14px;margin:10px 0}
+  .recipe.lvl5{border-color:#22c55e}
+  .recipe.lvl3{border-color:#eab308}
+  .recipe.lvl1{border-color:#64748b}
+  .recipe h3{margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:8px}
+  .muted{color:#cbd5e1}
+  .badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:500;border:1px solid}
+  .lvl5{color:#22c55e;border-color:#22c55e;background:rgba(34,197,94,0.1)}
+  .lvl3{color:#eab308;border-color:#eab308;background:rgba(234,179,8,0.1)}
+  .lvl1{color:#94a3b8;border-color:#64748b;background:rgba(100,116,139,0.1)}
+  .hint{font-size:12px;color:#94a3b8;margin-top:4px}
+  .stats{display:flex;gap:16px;margin:8px 0;font-size:13px;flex-wrap:wrap}
+  .stat{color:var(--muted)}
+  .stat strong{color:var(--text)}
+  @media (max-width:900px){.grid{grid-template-columns:1fr}.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Minecolonies Food System</h1>
+  <div class="small">Interactive recipe calculator • Automatically handles intermediate ingredients</div>
+
+  <h2>Part 1 — Biomes</h2>
+  <div class="card">
+    <div class="row"><label><input type="checkbox" class="biome" data-biome="temperate"> Temperate</label></div>
+    <div class="hint">Adds: Bell Pepper, Tomato, Corn</div>
+    <div class="row"><label><input type="checkbox" class="biome" data-biome="hot_dry"> Hot &amp; Dry</label></div>
+    <div class="hint">Adds: Chickpea, Nether Pepper</div>
+    <div class="row"><label><input type="checkbox" class="biome" data-biome="hot_humid"> Hot &amp; Humid</label></div>
+    <div class="hint">Adds: Rice, Soybean, Pea</div>
+    <div class="row"><label><input type="checkbox" class="biome" data-biome="cold"> Cold</label></div>
+    <div class="hint">Adds: Cabbage, Squash</div>
+    <div class="row"><label><input type="checkbox" class="biome" data-biome="all"> All Biomes</label></div>
+    <div class="hint">Adds: Durum Wheat, Eggplant, Garlic, Onion, Mint</div>
+  </div>
+
+  <h2>Part 2 — Available Ingredients</h2>
+  <div class="grid3">
+    <div class="card">
+      <strong>Dairy</strong>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Large Milk Bottle"> Large Milk Bottle</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Large Soy Milk Bottle"> Large Soy Milk Bottle</label></div>
+      <div class="small">Large Water Bottle is always available.</div>
+    </div>
+    <div class="card">
+      <strong>Meat &amp; Poultry</strong>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Beef"> Beef</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Porkchop"> Porkchop</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Mutton"> Mutton</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Chicken"> Chicken</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Rabbit"> Rabbit</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Egg"> Egg</label></div>
+    </div>
+    <div class="card">
+      <strong>Fish</strong>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Cod"> Cod</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Salmon"> Salmon</label></div>
+    </div>
+    <div class="card">
+      <strong>Pantry</strong>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Sugar"> Sugar</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Honey Bottle"> Honey Bottle</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Stick"> Stick</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Brown Mushroom"> Brown Mushroom</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Dried Kelp"> Dried Kelp</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Kelp"> Kelp</label></div>
+    </div>
+    <div class="card">
+      <strong>Vegetables (Vanilla)</strong>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Potato"> Potato</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Carrot"> Carrot</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Beetroot"> Beetroot</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Sweet Berries"> Sweet Berries</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Apple"> Apple</label></div>
+    </div>
+    <div class="card">
+      <strong>Basics</strong>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Bowl"> Bowl</label></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Search, Sort & Filters</h2>
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+      <input id="search" type="search" placeholder="Search foods..." style="flex:1;min-width:200px" />
+      <select id="sortBy">
+        <option value="name">Sort: Name (A-Z)</option>
+        <option value="level">Sort: Quality Tier (High to Low)</option>
+      </select>
+    </div>
+    <div class="hint" style="margin-bottom:8px">Filter by Quality Tier:</div>
+    <div class="filters">
+      <label class="pill"><input type="checkbox" id="filter-lvl5"> 🟢 Happy For Sure (Level 5)</label>
+      <label class="pill"><input type="checkbox" id="filter-lvl3"> 🟡 Satisfied (Level 3)</label>
+      <label class="pill"><input type="checkbox" id="filter-lvl1"> ⚪ Somewhat Acceptable (Level 1)</label>
+    </div>
+    <div class="hint" style="margin:12px 0 8px 0">Filter by Crafting Location:</div>
+    <div class="filters">
+      <label class="pill"><input type="checkbox" id="filter-hand"> Hand-Craftable</label>
+      <label class="pill"><input type="checkbox" id="filter-cook"> Cook/Chef</label>
+      <label class="pill"><input type="checkbox" id="filter-baker"> Baker</label>
+    </div>
+  </div>
+
+  <h2>Part 3 — Foods You Can Make (<span id="count">0</span>)</h2>
+  <div id="recipes"></div>
+</div>
+
+<script>
+const BIOME_CROPS = {
+  "temperate": ["Bell Pepper","Tomato","Corn"],
+  "hot_dry": ["Chickpea","Nether Pepper"],
+  "hot_humid": ["Rice","Soybean","Pea"],
+  "cold": ["Cabbage","Squash"],
+  "all": ["Durum","Eggplant","Garlic","Onion","Mint"]
+};
+
+const ALWAYS = new Set(["Large Water Bottle"]);
+
+// Intermediate ingredients that can be auto-crafted
+const INTERMEDIATES = {
+  "Butter": ["Large Milk Bottle"],
+  "Cheddar Cheese": ["Large Milk Bottle"],
+  "Feta Cheese": ["Large Milk Bottle"],
+  "Cream Cheese": ["Large Milk Bottle"],
+  "Yogurt": ["Large Milk Bottle"],
+  "Manchet Dough": ["Durum"],
+  "Manchet Bread": ["Manchet Dough"],
+  "Muffin Dough": ["Durum"],
+  "Flatbread": ["Durum", "Large Water Bottle"],
+  "Cornmeal": ["Corn"],
+  "Tortillas": ["Cornmeal"],
+  "Raw Noodle": ["Durum"],
+  "Cooked Rice": ["Rice", "Bowl"],
+  "Chicken Broth": ["Garlic", "Onion", "Chicken", "Bowl", "Large Water Bottle"],
+  "Tofu": ["Soybean"],
+  "Soysauce": ["Soybean"],
+};
+
+const SOY_ALTERNATIVES = new Set(["Butter", "Cream Cheese", "Yogurt"]);
+
+// All recipes with full metadata
+const RECIPES = [
+  {name:"Apple Pie", ingredients:["Durum","Durum","Durum","Apple","Apple","Sugar"], craftedBy:"Hand", level:3},
+  {name:"Baked Salmon", ingredients:["Garlic","Garlic","Garlic","Salmon","Salmon"], craftedBy:"Hand", level:3},
+  {name:"Borscht", ingredients:["Chicken Broth","Garlic","Onion","Beetroot","Beetroot","Bowl","Potato"], craftedBy:"Cook", level:5},
+  {name:"Cabochis", ingredients:["Cabbage","Manchet Bread","Onion","Bowl"], craftedBy:"Hand", level:3},
+  {name:"Cheddar Cheese", ingredients:["Large Milk Bottle","Large Milk Bottle","Large Milk Bottle","Large Milk Bottle"], craftedBy:"Hand", level:1},
+  {name:"Cheese Pizza", ingredients:["Cheddar Cheese","Durum","Durum","Durum","Garlic","Tomato","Tomato"], craftedBy:"Hand", level:3},
+  {name:"Cheese Ravioli", ingredients:["Cheddar Cheese","Durum","Durum"], craftedBy:"Hand", level:1},
+  {name:"Chicken Broth", ingredients:["Garlic","Large Water Bottle","Onion","Bowl","Chicken"], craftedBy:"Hand", level:1},
+  {name:"Congee", ingredients:["Cabbage","Cooked Rice","Garlic","Bowl"], craftedBy:"Hand", level:3},
+  {name:"Cooked Rice", ingredients:["Rice","Bowl"], craftedBy:"Hand", level:1},
+  {name:"Corn Chowder", ingredients:["Corn","Garlic","Large Milk Bottle","Onion","Bowl"], craftedBy:"Hand", level:1, variants:[{name:"Corn Chowder (Soy)", ingredients:["Corn","Garlic","Large Soy Milk Bottle","Onion","Bowl"]}]},
+  {name:"Cornmeal", ingredients:["Corn","Corn","Corn","Corn"], craftedBy:"Hand", level:1},
+  {name:"Eggdrop Soup", ingredients:["Onion","Onion","Chicken","Egg","Egg"], craftedBy:"Hand", level:3},
+  {name:"Eggplant Dolma", ingredients:["Durum","Eggplant","Feta Cheese","Garlic","Onion","Tomato"], craftedBy:"Cook", level:5},
+  {name:"Feta Cheese", ingredients:["Large Milk Bottle","Large Milk Bottle"], craftedBy:"Hand", level:1},
+  {name:"Fish Dinner", ingredients:["Cabbage","Garlic","Garlic","Brown Mushroom","Cod"], craftedBy:"Cook", level:5},
+  {name:"Fish N Chips", ingredients:["Durum","Garlic","Onion","Potato","Salmon"], craftedBy:"Hand", level:3},
+  {name:"Flatbread", ingredients:["Durum","Durum","Large Water Bottle"], craftedBy:"Baker", level:1},
+  {name:"Fried Rice — Beef", ingredients:["Beef","Cooked Rice","Onion","Carrot","Egg"], craftedBy:"Hand", level:3},
+  {name:"Fried Rice — Mutton", ingredients:["Mutton","Cooked Rice","Onion","Carrot","Egg"], craftedBy:"Hand", level:3},
+  {name:"Fried Rice — Porkchop", ingredients:["Porkchop","Cooked Rice","Onion","Carrot","Egg"], craftedBy:"Hand", level:3},
+  {name:"Fried Rice — Chicken", ingredients:["Chicken","Cooked Rice","Onion","Carrot","Egg"], craftedBy:"Hand", level:3},
+  {name:"Fried Rice — Rabbit", ingredients:["Rabbit","Cooked Rice","Onion","Carrot","Egg"], craftedBy:"Hand", level:3},
+  {name:"Hand Pie", ingredients:["Durum","Garlic","Onion","Brown Mushroom","Mutton"], craftedBy:"Cook", level:5},
+  {name:"Kebab", ingredients:["Garlic","Nether Pepper","Onion","Mutton","Mutton","Stick"], craftedBy:"Hand", level:1},
+  {name:"Kimchi", ingredients:["Cabbage","Cabbage","Nether Pepper","Onion","Bowl","Carrot"], craftedBy:"Hand", level:3},
+  {name:"Lamb Stew", ingredients:["Cabbage","Garlic","Onion","Bowl","Brown Mushroom","Carrot","Carrot","Mutton","Potato","Potato"], craftedBy:"Cook", level:5},
+  {name:"Lembas Scone", ingredients:["Butter","Durum","Honey Bottle"], craftedBy:"Baker", level:3},
+  {name:"Manchet Bread", ingredients:["Manchet Dough"], craftedBy:"Baker", level:3},
+  {name:"Meat Ravioli", ingredients:["Durum","Durum","Beef"], craftedBy:"Hand", level:1},
+  {name:"Mint Jelly", ingredients:["Large Water Bottle","Mint","Mint","Mint","Sugar"], craftedBy:"Hand", level:1},
+  {name:"Mint Tea", ingredients:["Large Water Bottle","Mint","Mint","Mint","Honey Bottle"], craftedBy:"Hand", level:1},
+  {name:"Muffin", ingredients:["Muffin Dough"], craftedBy:"Baker", level:3},
+  {name:"Mushroom Pizza", ingredients:["Cheddar Cheese","Durum","Durum","Durum","Garlic","Tomato","Tomato","Brown Mushroom","Brown Mushroom"], craftedBy:"Baker", level:5},
+  {name:"Mutton Dinner", ingredients:["Garlic","Pea","Mutton","Potato"], craftedBy:"Hand", level:5},
+  {name:"Pasta Plain", ingredients:["Butter","Garlic","Raw Noodle","Bowl"], craftedBy:"Hand", level:3},
+  {name:"Pasta Tomato", ingredients:["Garlic","Onion","Raw Noodle","Tomato","Tomato","Bowl"], craftedBy:"Hand", level:3},
+  {name:"Pea Soup", ingredients:["Garlic","Large Milk Bottle","Onion","Pea","Bowl"], craftedBy:"Hand", level:1, variants:[{name:"Pea Soup (Soy)", ingredients:["Garlic","Large Soy Milk Bottle","Onion","Pea","Bowl"]}]},
+  {name:"Pepper Hummus", ingredients:["Bell Pepper","Bell Pepper","Chickpea","Chickpea","Garlic"], craftedBy:"Hand", level:3},
+  {name:"Pierogi", ingredients:["Cheddar Cheese","Durum","Garlic","Onion","Potato"], craftedBy:"Hand", level:3},
+  {name:"Pita Hummus", ingredients:["Chickpea","Chickpea","Eggplant","Flatbread","Garlic","Onion"], craftedBy:"Cook", level:5},
+  {name:"Plain Cheesecake", ingredients:["Butter","Cream Cheese","Cream Cheese","Durum","Egg","Egg","Sugar"], craftedBy:"Hand", level:3},
+  {name:"Polenta", ingredients:["Cornmeal","Cornmeal","Large Water Bottle","Bowl"], craftedBy:"Hand", level:1},
+  {name:"Potato Soup", ingredients:["Garlic","Onion","Bowl","Potato"], craftedBy:"Hand", level:1},
+  {name:"Pottage", ingredients:["Durum","Garlic","Onion","Bowl","Carrot","Potato"], craftedBy:"Hand", level:3},
+  {name:"Ramen", ingredients:["Garlic","Onion","Raw Noodle","Soysauce","Bowl","Kelp"], craftedBy:"Cook", level:5},
+  {name:"Rice Ball", ingredients:["Cooked Rice","Tofu","Dried Kelp"], craftedBy:"Hand", level:3},
+  {name:"Schnitzel", ingredients:["Durum","Durum","Manchet Bread","Egg","Porkchop","Potato"], craftedBy:"Cook", level:5},
+  {name:"Spicy Eggplant", ingredients:["Eggplant","Eggplant","Garlic","Nether Pepper","Nether Pepper","Onion","Bowl"], craftedBy:"Cook", level:5},
+  {name:"Spicy Grilled Chicken", ingredients:["Garlic","Nether Pepper","Chicken","Chicken"], craftedBy:"Hand", level:1},
+  {name:"Squash Soup", ingredients:["Squash","Garlic","Onion","Bowl"], craftedBy:"Hand", level:1},
+  {name:"Steak Dinner", ingredients:["Garlic","Garlic","Onion","Beef","Potato","Potato"], craftedBy:"Cook", level:5},
+  {name:"Stew Trencher", ingredients:["Cabbage","Manchet Bread","Onion","Tomato"], craftedBy:"Cook", level:5},
+  {name:"Stuffed Pepper", ingredients:["Bell Pepper","Cooked Rice","Eggplant","Garlic","Tomato","Carrot"], craftedBy:"Cook", level:5},
+  {name:"Stuffed Pita", ingredients:["Eggplant","Flatbread","Garlic","Onion","Tomato"], craftedBy:"Cook", level:5},
+  {name:"Sushi Roll", ingredients:["Cooked Rice","Garlic","Onion","Dried Kelp","Salmon"], craftedBy:"Cook", level:5},
+  {name:"Tacos", ingredients:["Garlic","Nether Pepper","Tomato","Tortillas","Beef"], craftedBy:"Cook", level:5},
+  {name:"Tofu", ingredients:["Soybean"], craftedBy:"Hand", level:1},
+  {name:"Tortillas", ingredients:["Cornmeal","Cornmeal"], craftedBy:"Hand", level:1},
+  {name:"Veggie Quiche", ingredients:["Squash","Squash","Durum","Garlic","Large Water Bottle","Onion"], craftedBy:"Hand", level:3},
+  {name:"Veggie Ravioli", ingredients:["Durum","Durum","Beetroot"], craftedBy:"Hand", level:1},
+  {name:"Veggie Soup", ingredients:["Eggplant","Garlic","Garlic","Onion","Bowl","Carrot"], craftedBy:"Hand", level:3},
+  {name:"Yogurt", ingredients:["Large Milk Bottle"], craftedBy:"Hand", level:1, variants:[{name:"Yogurt (Soy)", ingredients:["Large Soy Milk Bottle"]}]},
+  {name:"Yogurt With Berries", ingredients:["Yogurt","Bowl","Sweet Berries","Sweet Berries","Sweet Berries","Sweet Berries"], craftedBy:"Hand", level:3},
+];
+
+const state = {biomes:new Set(), manual:new Set()};
+
+function buildAvailableSet(){
+  const have = new Set([...ALWAYS]);
+  for(const b of state.biomes){ (BIOME_CROPS[b]||[]).forEach(x=>have.add(x)); }
+  state.manual.forEach(x=>have.add(x));
+
+  let changed = true, guard = 0;
+  while(changed && guard++ < 15){
+    changed = false;
+    for(const [made, reqs] of Object.entries(INTERMEDIATES)){
+      if(have.has(made)) continue;
+      const canMakeRegular = reqs.every(r => have.has(r));
+      const canMakeSoy = SOY_ALTERNATIVES.has(made) && 
+        reqs.every(r => r === "Large Milk Bottle" ? have.has("Large Soy Milk Bottle") : have.has(r));
+      if(canMakeRegular || canMakeSoy){ have.add(made); changed = true; }
+    }
+  }
+  return have;
+}
+
+function canMake(recipe, have){ 
+  if(recipe.ingredients.every(req => have.has(req))) return true;
+  if(recipe.variants){
+    for(const variant of recipe.variants){
+      if(variant.ingredients.every(req => have.has(req))) return true;
+    }
+  }
+  return false;
+}
+
+function render(){
+  const root = document.getElementById("recipes");
+  root.innerHTML = "";
+  const have = buildAvailableSet();
+
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  const sortBy = document.getElementById("sortBy").value;
+  
+  const fHand = document.getElementById("filter-hand").checked;
+  const fCook = document.getElementById("filter-cook").checked;
+  const fBaker = document.getElementById("filter-baker").checked;
+  const fLvl5 = document.getElementById("filter-lvl5").checked;
+  const fLvl3 = document.getElementById("filter-lvl3").checked;
+  const fLvl1 = document.getElementById("filter-lvl1").checked;
+
+  let list = RECIPES.filter(r => canMake(r, have));
+  if(q) list = list.filter(r => r.name.toLowerCase().includes(q));
+  if(fHand) list = list.filter(r => r.craftedBy === "Hand");
+  if(fCook) list = list.filter(r => r.craftedBy === "Cook");
+  if(fBaker) list = list.filter(r => r.craftedBy === "Baker");
+  if(fLvl5) list = list.filter(r => r.level === 5);
+  if(fLvl3) list = list.filter(r => r.level === 3);
+  if(fLvl1) list = list.filter(r => r.level === 1);
+
+  // Sort
+  if(sortBy === "level"){
+    list.sort((a,b) => b.level - a.level || a.name.localeCompare(b.name));
+  } else {
+    list.sort((a,b) => a.name.localeCompare(b.name));
+  }
+
+  document.getElementById("count").textContent = list.length;
+
+  if(list.length === 0){
+    const none = document.createElement("div");
+    none.className = "hint";
+    none.textContent = "No recipes match your current selections. Try selecting more biomes or ingredients!";
+    root.appendChild(none);
+    return;
+  }
+
+  for(const r of list){
+    const card = document.createElement("div"); 
+    card.className = `recipe lvl${r.level}`;
+    
+    const h = document.createElement("h3"); 
+    
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = r.name;
+    h.appendChild(nameSpan);
+    
+    const levelBadge = document.createElement("span");
+    levelBadge.className = `badge lvl${r.level}`;
+    levelBadge.textContent = `Level ${r.level}`;
+    h.appendChild(levelBadge);
+    
+    card.appendChild(h);
+
+    // Stats
+    const stats = document.createElement("div");
+    stats.className = "stats";
+    stats.innerHTML = `<div class="stat"><strong>Crafted By:</strong> ${r.craftedBy}</div>`;
+    card.appendChild(stats);
+
+    // Ingredients
+    const ingCounts = {};
+    r.ingredients.forEach(ing => {
+      ingCounts[ing] = (ingCounts[ing] || 0) + 1;
+    });
+    
+    const ingList = document.createElement("div");
+    ingList.className = "muted small";
+    ingList.style.marginTop = "8px";
+    const ings = Object.entries(ingCounts)
+      .map(([ing, count]) => count > 1 ? `${ing} ×${count}` : ing)
+      .join(', ');
+    ingList.textContent = "Requires: " + ings;
+    card.appendChild(ingList);
+
+    root.appendChild(card);
+  }
+}
+
+document.querySelectorAll(".biome").forEach(el=>el.addEventListener("change", e=>{
+  const b = e.target.dataset.biome; 
+  if(e.target.checked) state.biomes.add(b); 
+  else state.biomes.delete(b); 
+  render(); 
+}));
+
+document.querySelectorAll(".ing").forEach(el=>el.addEventListener("change", e=>{
+  const n = e.target.dataset.name; 
+  if(e.target.checked) state.manual.add(n); 
+  else state.manual.delete(n); 
+  render(); 
+}));
+
+document.getElementById("search").addEventListener("input", render);
+document.getElementById("sortBy").addEventListener("change", render);
+document.querySelectorAll(".filters input[type=checkbox]").forEach(el=>el.addEventListener("change", render));
+
+render();
+</script>
+</body>
+</html>
