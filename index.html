@@ -66,7 +66,6 @@
       <strong>Dairy</strong>
       <div class="row"><label><input type="checkbox" class="ing" data-name="Large Milk Bottle"> Large Milk Bottle</label></div>
       <div class="row"><label><input type="checkbox" class="ing" data-name="Large Soy Milk Bottle"> Large Soy Milk Bottle</label></div>
-      <div class="small">Large Water Bottle is always available.</div>
     </div>
     <div class="card">
       <strong>Meat &amp; Poultry</strong>
@@ -79,17 +78,14 @@
     </div>
     <div class="card">
       <strong>Fish</strong>
-      <div class="row"><label><input type="checkbox" class="ing" data-name="Cod"> Cod</label></div>
-      <div class="row"><label><input type="checkbox" class="ing" data-name="Salmon"> Salmon</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Fish" data-includes="Cod,Salmon"> Cod/Salmon</label></div>
     </div>
     <div class="card">
       <strong>Pantry</strong>
       <div class="row"><label><input type="checkbox" class="ing" data-name="Sugar"> Sugar</label></div>
       <div class="row"><label><input type="checkbox" class="ing" data-name="Honey Bottle"> Honey Bottle</label></div>
-      <div class="row"><label><input type="checkbox" class="ing" data-name="Stick"> Stick</label></div>
       <div class="row"><label><input type="checkbox" class="ing" data-name="Brown Mushroom"> Brown Mushroom</label></div>
-      <div class="row"><label><input type="checkbox" class="ing" data-name="Dried Kelp"> Dried Kelp</label></div>
-      <div class="row"><label><input type="checkbox" class="ing" data-name="Kelp"> Kelp</label></div>
+      <div class="row"><label><input type="checkbox" class="ing" data-name="Kelp" data-includes="Dried Kelp"> Kelp/Dried Kelp</label></div>
     </div>
     <div class="card">
       <strong>Vegetables (Vanilla)</strong>
@@ -101,7 +97,10 @@
     </div>
     <div class="card">
       <strong>Basics</strong>
-      <div class="row"><label><input type="checkbox" class="ing" data-name="Bowl"> Bowl</label></div>
+      <div class="row"><label><input type="checkbox" class="ing auto-check" data-name="Large Water Bottle" checked> Large Water Bottle</label></div>
+      <div class="row"><label><input type="checkbox" class="ing auto-check" data-name="Bowl" checked> Bowl</label></div>
+      <div class="row"><label><input type="checkbox" class="ing auto-check" data-name="Stick" checked> Stick</label></div>
+      <div class="small">These are assumed to be always available.</div>
     </div>
   </div>
 
@@ -141,7 +140,7 @@ const BIOME_CROPS = {
   "all": ["Durum","Eggplant","Garlic","Onion","Mint"]
 };
 
-const ALWAYS = new Set(["Large Water Bottle"]);
+const ALWAYS = new Set([]);
 
 // Intermediate ingredients that can be auto-crafted
 const INTERMEDIATES = {
@@ -355,15 +354,32 @@ document.querySelectorAll(".biome").forEach(el=>el.addEventListener("change", e=
 }));
 
 document.querySelectorAll(".ing").forEach(el=>el.addEventListener("change", e=>{
-  const n = e.target.dataset.name; 
-  if(e.target.checked) state.manual.add(n); 
-  else state.manual.delete(n); 
+  const n = e.target.dataset.name;
+  const includes = e.target.dataset.includes ? e.target.dataset.includes.split(',') : [];
+  
+  if(e.target.checked) {
+    state.manual.add(n);
+    // Auto-add related items
+    includes.forEach(item => state.manual.add(item));
+  } else {
+    state.manual.delete(n);
+    // Remove related items
+    includes.forEach(item => state.manual.delete(item));
+  }
   render(); 
 }));
 
 document.getElementById("search").addEventListener("input", render);
 document.getElementById("sortBy").addEventListener("change", render);
 document.querySelectorAll(".filters input[type=checkbox]").forEach(el=>el.addEventListener("change", render));
+
+// Initialize auto-checked items
+document.querySelectorAll(".auto-check").forEach(el => {
+  if(el.checked) {
+    const n = el.dataset.name;
+    state.manual.add(n);
+  }
+});
 
 render();
 </script>
